@@ -30,7 +30,7 @@ self.addEventListener('activate', function (event) {
 });
 
 // Intercept fetch requests and cache them
-self.addEventListener('fetch', async (event) => {
+
   // We added some known URLs to the cache above, but tracking down every
   // subsequent network request URL and adding it manually would be very taxing.
   // We will be adding all of the resources not specified in the intiial cache
@@ -45,18 +45,17 @@ self.addEventListener('fetch', async (event) => {
   // B7. TODO - Respond to the event by opening the cache using the name we gave
   //            above (CACHE_NAME)
     // Respond to the event by opening the cache using the name we gave above (CACHE_NAME)
-    event.respondWith(caches.open(CACHE_NAME).then((cache) => {
-      return cache.match(event.request).then((cachedResponse) => {
-        // If the request is in the cache, return with the cached version, otherwise fetch the resource
-        return cachedResponse || fetch(event.request).then((fetchedResponse) => {
-          // Add it to the cache
-          cache.put(event.request, fetchedResponse.clone());
-          // And return network response
-          return fetchedResponse;
-        });
+      self.addEventListener('fetch', async (event) => {
+        // Respond to the event by opening the cache using the name we gave above (CACHE_NAME)
+        event.respondWith(caches.open(CACHE_NAME).then((cache) => {
+          return cache.match(event.request).then((cachedResponse) => {
+            // If the request is in the cache, return with the cached version, otherwise fetch the resource
+            return cachedResponse || fetch(event.request).then((fetchedResponse) => {
+              // Add it to the cache
+              cache.put(event.request, fetchedResponse.clone());
+              // And return network response
+              return fetchedResponse;
+            });
+          });
+        }));
       });
-    }));
-  // B8. TODO - If the request is in the cache, return with the cached version.
-  //            Otherwise fetch the resource, add it to the cache, and return
-  //            network response.
-});
